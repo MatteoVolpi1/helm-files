@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "my-helm-chart.name" . }}-cronjob
+  labels:
+    {{- include "my-helm-chart.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    spec:
+      backoffLimit: 4
+      template:
+        spec:
+          serviceAccountName: {{ include "my-helm-chart.name" . }}-sa
+          containers:
+            - name: image-checker
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:
+                - name: IMAGE_MAPPINGS
+                  value: "{{ .Values.imageUrls | toJson }}"
+              volumeMounts:
+                - name: digest-storage
+                  mountPath: /app/digests
+          restartPolicy: OnFailure
+          volumes:
+            - name: digest-storage
+              persistentVolumeClaim:
+                claimName: {{ include "my-helm-chart.name" . }}-pvc

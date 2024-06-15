@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "my-helm-chart.name" . }}
+  labels:
+    {{- include "my-helm-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "my-helm-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "my-helm-chart.name" . }}
+    spec:
+      serviceAccountName: {{ include "my-helm-chart.name" . }}-sa
+      containers:
+        - name: image-checker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: IMAGE_URLS
+              value: "{{ join "," .Values.imageUrls }}"

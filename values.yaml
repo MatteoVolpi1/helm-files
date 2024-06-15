@@ -1,0 +1,13 @@
+image:
+  repository: my-checker-image
+  tag: latest
+  pullPolicy: IfNotPresent
+
+schedule: "*/30 * * * *" # Every 30 minutes
+imageUrls:
+  - url: ziophil/client:latest
+    deployment: client-deployment
+  - url: ziophil/server:latest
+    deployment: server-deployment
+  - url: matteovolpi/api:latest
+    deployment: api-deployment
